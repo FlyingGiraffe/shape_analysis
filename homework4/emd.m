@@ -1,7 +1,7 @@
-addpath('utils/');
 clear;
+addpath('utils/');
 %% Load mesh
-filename = 'moomoo.off';
+filename = 'meshes/moomoo.off';
 [X,T] = readOff(filename);
 nv = size(X,1);
 nt = size(T,1);
@@ -21,13 +21,13 @@ showDescriptor(mesh,p);
 %showDescriptor(mesh,q);
 
 %% Regularized EMD code
-%time = .00001;
-time = 0.05;
+time = .00001;
+%time = 0.05;
 steps = 5;
 %kernel = @(x) heatDiffusion(x,mesh,time,steps);
 
-alpha = 0.1;
-%alpha = .00002;
+%alpha = 0.1;
+alpha = .00002;
 niter = 1000;
 
 % YOUR CODE HERE TO PERFORM SINKHORN ITERATIONS %%%
@@ -48,15 +48,12 @@ function W = EMD(p,q,mesh,time,steps,alpha,niter)
     threshold = 1e-6;
     W_old = 0;
     for k = 1:niter
-        for repeat = 1:2
-            v_new = p./kernel(w);
-            w_new = q./kernel(v);
-            v = v_new; w = w_new;
-        end
+        v = p./kernel(w);
+        w = q./kernel(v);
         logv = log(v); logv(v<=0) = 0;
         logw = log(w); logw(w<=0) = 0;
         W = alpha*sum(p.*logv+q.*logw);
-        if norm(W_old - W)< threshold && k>2
+        if norm(W_old-W) < threshold  &&  k > 2
             break;
         end
         W_old = W;
